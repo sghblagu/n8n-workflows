@@ -1,0 +1,160 @@
+{
+  "name": "ISO 42001 copy 2",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "airtableTokenApi",
+        "operation": "append",
+        "application": {
+          "__rl": true,
+          "value": "https://airtable.com/appC8NFcmaQc499VV/tbl9lRluwtiR9sZ8E/viwchwGJ1OgSeaf2k?blocks=hide",
+          "mode": "url"
+        },
+        "table": "ISO 42001 Evaluations",
+        "options": {}
+      },
+      "id": "71f2a4e3-eb96-4d68-b383-bc039f2e9302",
+      "name": "Log Evaluation to Airtable",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 1,
+      "position": [
+        800,
+        80
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "Dmmfi6NMSF9sMWk0",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        144
+      ],
+      "id": "7c9be6d5-179e-448c-9640-8a64b04e76e7",
+      "name": "When chat message received",
+      "webhookId": "f01ba01b-d12b-4caf-83ae-0971e58d56fe"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "This is a test message",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        352,
+        144
+      ],
+      "id": "86cc6603-1025-4f79-9d5e-5d8c97c3a933",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        368,
+        320
+      ],
+      "id": "5e6df451-c8ee-4c6d-b203-dfe5a4a968ea",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "zXb5aWe4wWuDaRXG",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "c6dd0c93-f90e-4a19-ba45-419a9e149b58",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        32
+      ],
+      "id": "4af9670b-c28c-42b8-bb8a-ce86f8bb3ada",
+      "name": "Webhook",
+      "webhookId": "c6dd0c93-f90e-4a19-ba45-419a9e149b58"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Log Evaluation to Airtable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "66df66a6-5fa4-4974-a38b-b40c521c3f66",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "307b6e5a54d8d4652e1fd99bbbd1883df2885b6d6c5ef996d39004d483f54427"
+  },
+  "id": "yq8ygGYgO5pjnyR5",
+  "tags": []
+}

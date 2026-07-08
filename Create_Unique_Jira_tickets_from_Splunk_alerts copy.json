@@ -1,0 +1,346 @@
+{
+  "name": "Create_Unique_Jira_tickets_from_Splunk_alerts copy",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "d69c2cb3-6414-4b60-ae8b-11e361fc9cb2",
+        "options": {}
+      },
+      "id": "8c5216bf-2278-4eca-93aa-6c3a5f1c3f2f",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        480,
+        352
+      ],
+      "webhookId": "d69c2cb3-6414-4b60-ae8b-11e361fc9cb2",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "issueComment",
+        "issueKey": "={{ $json.key }}",
+        "comment": "=Timestamp: {{ $('Set Host Name').item.json.body.timestamp }}\nDescription: {{ $('Set Host Name').item.json.body.description }}",
+        "options": {}
+      },
+      "id": "6148c49a-9f61-4b2e-b83d-164d188ff509",
+      "name": "Add Ticket Comment",
+      "type": "n8n-nodes-base.jira",
+      "position": [
+        1360,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "options": {
+          "jql": "=splunkhostname ~ \"{{ $json['splunk-host-name'] }}\" "
+        }
+      },
+      "id": "286db4d1-9536-4892-a565-633617aec52a",
+      "name": "Search Ticket",
+      "type": "n8n-nodes-base.jira",
+      "position": [
+        928,
+        352
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "splunk-host-name",
+              "value": "={{ $json.body.inputs.A.key['host.name'].replace(/[^a-zA-Z0-9 ]/g, '') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "69f5fdc6-c62c-4b3e-89aa-7e131f856aba",
+      "name": "Set Host Name",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        704,
+        352
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.key }}",
+              "operation": "isEmpty"
+            }
+          ]
+        }
+      },
+      "id": "91b39793-71c0-4e45-b826-ef3ab13e5c9d",
+      "name": "IF Ticket Not Exists",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1152,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "![VirusTotal](https://i.imgur.com/spMd6AQ.png)\n## Webhook Node \nTo setup your webhook integration for Splunk, first ensure that splunk is setup to send alerts to a webhook by visiting the [Setup Guide here](https://docs.splunk.com/observability/en/admin/notif-services/webhook.html). You will copy the n8n webhook url opening the webhook node below. \n- **Form Access URLs**:\n  - **Execute Mode**: `https://n8n.domain.com/webhook/test/webhookpath` - Use this to execute the workflow interactively within the n8n canvas. Hit the 'Execute Workflow' button to see real-time execution results. We have pinned data in the webhook node to make testing easier. \n  - **Silent Mode**: `https://n8n.domain.com/webhook/webhookpath` - Use this for background execution without canvas updates. Results will be logged silently and can be reviewed in the 'Executions' tab.",
+        "height": 537.944771288002,
+        "width": 643.8620281403546
+      },
+      "id": "6e0c9c8c-3275-4753-9229-8552c630677a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "project": {
+          "__rl": true,
+          "mode": "list",
+          "value": "10001",
+          "cachedResultName": "Service Desk"
+        },
+        "issueType": {
+          "__rl": true,
+          "mode": "list",
+          "value": "10004",
+          "cachedResultName": "[System] Incident"
+        },
+        "summary": "=Splunk Alert for host {{ $('Set Host Name').item.json.body.inputs.A.key[\"host.name\"] }}:  {{ $('Set Host Name').item.json.body.description }}",
+        "additionalFields": {
+          "description": "={{ $('Set Host Name').item.json.body.description }}\n\n{{ $('Set Host Name').item.json.body.messageBody }}",
+          "customFieldsUi": {
+            "customFieldsValues": [
+              {
+                "fieldId": {
+                  "__rl": true,
+                  "mode": "id",
+                  "value": "customfield_10063"
+                },
+                "fieldValue": "={{ $('Webhook').item.json[\"body\"][\"inputs\"][\"A\"][\"key\"][\"host.name\"].replace(/[^a-zA-Z0-9 ]/g, '') }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "2e1d97bc-8c36-4ac3-8fbd-3e1901ca1ea5",
+      "name": "Create Ticket",
+      "type": "n8n-nodes-base.jira",
+      "position": [
+        1360,
+        192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "![VirusTotal](https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Jira_%28Software%29_logo.svg/320px-Jira_%28Software%29_logo.svg.png)\n## Normalize Hostname \nTo ensure no special characters are passed into jira and create issues, this set node removes special characters from the `splunk-host-name` and uses that to search and create tickets. This host name is saved as a custom field. ",
+        "height": 413.43480804607805,
+        "width": 401.99970102055784
+      },
+      "id": "5809173e-5cf6-4267-a7c9-617ac71131bc",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "![VirusTotal](https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Jira_%28Software%29_logo.svg/320px-Jira_%28Software%29_logo.svg.png)\n## Create a new ticket\nThis creates a new ticket in your Prjoect and issue type. Ensure to update these values to ensure it works correctly. ",
+        "height": 348.38243930996134,
+        "width": 401.99970102055784
+      },
+      "id": "b5210984-d3ef-45aa-9a48-d5c2dbf2186e",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "![VirusTotal](https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Jira_%28Software%29_logo.svg/320px-Jira_%28Software%29_logo.svg.png)\n## Add Ticket Comment\nThis adds the alert as a comment in the existing ticket, to ensure the data is not duplicated. ",
+        "height": 341.08777742613927,
+        "width": 401.99970102055784
+      },
+      "id": "99f1fc0a-e9c7-47d4-98ba-111f8117a096",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1312,
+        368
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Check if ticket found\nThis checks `$json.key` to see if the value was found, and route accordingly.",
+        "height": 415.27445353029793,
+        "width": 193.6032856277124
+      },
+      "id": "db17797c-1d71-43d6-ba11-3fc0bce042a3",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1088,
+        128
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "body": {
+            "tip": null,
+            "rule": "n8n-test",
+            "inputs": {
+              "A": {
+                "key": {
+                  "os.type": "linux",
+                  "host.name": "n8n-enterprise-demo",
+                  "sf_metric": "cpu.utilization"
+                },
+                "value": "0.1670342357065173",
+                "fragment": "data('cpu.utilization').publish(label='A')"
+              },
+              "_S2": {
+                "value": "0.2",
+                "fragment": "threshold(0.2)"
+              }
+            },
+            "status": "ok",
+            "detector": "n8n-test",
+            "imageUrl": "https://static.eu0.signalfx.com/signed/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjb20uc2lnbmFsZnguYXBwIiwiZXhwIjoxNjk0NjE0NjI2LCJpSWQiOiJGNVZBcTEwQUVBQSIsIm9JZCI6IkY1V0JKZ2lBSUFBIiwiYlQiOiJlbmQifQ.udzyF5-HqKyV_EMRmT51EtgECK9g-wanl8nx_MH0i9Q/async",
+            "severity": "Critical",
+            "eventType": "F5Vx1EuAAKc__F5V-TcTAEJ8__n8n-test",
+            "sf_schema": 2,
+            "timestamp": "2023-09-06T14:17:00Z",
+            "detectorId": "F5V-TcTAEJ8",
+            "incidentId": "F5VAq10AEAA",
+            "runbookUrl": null,
+            "description": "The value of cpu.utilization is above 0.2.",
+            "detectorUrl": "https://app.eu0.signalfx.com/#/detector/F5V-TcTAEJ8/edit?incidentId=F5VAq10AEAA&is=ok",
+            "messageBody": "Rule \"n8n-test\" in detector \"n8n-test\" cleared at Wed, 6 Sep 2023 14:17:00 GMT.\n\nCurrent signal value for n8n.test: 0.1670342357065173\n\nSignal details:\n{sf_metric=cpu.utilization, host.name=n8n-enterprise-demo, os.type=linux}",
+            "messageTitle": "Back to normal: n8n-test (n8n-test)",
+            "statusExtended": "ok",
+            "detectOnCondition": "when(A > threshold(0.2))",
+            "originatingMetric": "cpu.utilization",
+            "triggeredWhileMuted": false
+          },
+          "query": {},
+          "params": {},
+          "headers": {
+            "host": "internal.users.n8n.cloud",
+            "x-real-ip": "10.255.0.2",
+            "user-agent": "Apache-HttpClient/4.5.14 (Java/1.8.0_372)",
+            "content-type": "application/json; charset=utf-8",
+            "content-length": "1366",
+            "accept-encoding": "gzip,deflate",
+            "x-forwarded-for": "10.255.0.2",
+            "x-forwarded-host": "internal.users.n8n.cloud",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "e591fa1c2d01"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set Host Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Ticket": {
+      "main": [
+        [
+          {
+            "node": "IF Ticket Not Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Host Name": {
+      "main": [
+        [
+          {
+            "node": "Search Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF Ticket Not Exists": {
+      "main": [
+        [
+          {
+            "node": "Create Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add Ticket Comment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "33587576-af93-43df-b5b5-92812c28a7f0",
+  "meta": {
+    "instanceId": "307b6e5a54d8d4652e1fd99bbbd1883df2885b6d6c5ef996d39004d483f54427"
+  },
+  "id": "7EeZlIWboWIGb6Ie",
+  "tags": [
+    {
+      "updatedAt": "2026-02-09T19:57:11.520Z",
+      "createdAt": "2026-02-09T19:57:11.520Z",
+      "id": "mzpFNrZstt7Kcv0i",
+      "name": "🛠️ In progress"
+    },
+    {
+      "updatedAt": "2026-02-09T19:57:11.491Z",
+      "createdAt": "2026-02-09T19:57:11.491Z",
+      "id": "xFIIuNcSIvZtBxr7",
+      "name": "Secops"
+    }
+  ]
+}
